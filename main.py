@@ -2,7 +2,7 @@
 
 from typing import List
 
-import subprocess, socket
+import subprocess, socket, psutil, signal
 from fastapi import (
     FastAPI,
     WebSocket,
@@ -60,7 +60,7 @@ class Command(BaseModel):
     args: List[str]
 
 
-proc_ids = []
+proc_ids = procs = []
 app = FastAPI()
 proc = None
 
@@ -92,7 +92,7 @@ def init_proc(proc_info: Command):
     """
     TODO: Return proc info and detach from parent while spying it using its PID, instead of returning the STDOUT.
     """
-    global proc_ids, proc
+    global proc_ids, proc, procs
     cmd = f'{proc_info.name} {" ".join(proc_info.args)}'
     print(cmd)
     proc = subprocess.Popen(cmd,
@@ -100,6 +100,9 @@ def init_proc(proc_info: Command):
                             stderr=subprocess.PIPE,
                             shell=True)
     proc_ids.append(proc.pid)
+    for _proc in psutil.process_iter():
+        if _proc.id == proc.pid:
+            procs.append(_proc)
     return {'initiated': proc.pid}
 
 
@@ -115,10 +118,13 @@ def return_std_out_err():
 
 @app.delete('/proc')
 def kill_proc():
-    global proc_ids, proc
+    global proc_ids, proc, procs
     if proc:
         pid = proc.pid; proc_ids.remove(pid)
         proc.kill(); proc = None
+        for _proc in procs:
+            if _proc.id == pid:
+                procs.remove(_proc)
         return {'killed': pid}
     raise HTTPException(status_code=406, detail='No running process.')
 
@@ -156,5 +162,6 @@ if __name__ == '__main__':
     while is_port_in_use(random_port):
         random_port = randint(1025, 65534)
     __import__('webbrowser').open_new_tab(f'http://localhost:{random_port}')
-    __import__('os').system('python3 ./commanderX.py &')
+    ws_pid = __import__('os').system('python3 ./commanderX.py &')
     __import__('uvicorn').run('main:app', host='0.0.0.0', port=random_port, reload=True)
+    __import__('os').kill(ws_pid, signal.SIGKILL)
