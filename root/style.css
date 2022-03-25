@@ -1,4 +1,4 @@
-body {
+:qbody {
   background: #000;
   color: #FFF;
   font-family: monospace;
@@ -10,7 +10,7 @@ a {
 }
 
 input {
-  width: 80%;
+  width: 88%;
   border: none;
   background: rgba(0,0,0,0);
   color: #FFF;
@@ -30,8 +30,8 @@ code {
 }
 
 button {
-  background: rgba(0,0,0,0);
-  color: #FFF;
+  background: #FFF;
+  color: #000;
   border: none;
   font-size: large;
 }
