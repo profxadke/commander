@@ -10,19 +10,31 @@
     <div id="app">
       <h1 align="center"><a href="/">commanderX</a></h1>
       <div id="input">
-        $ <input name="cmd" placeholder="$ " autofocus="autofocus" onfocus="this.select()"> <button onclick="command()">Execute!</button>
+        <a href="/">$</a> <input name="cmd" placeholder="$ " autofocus="autofocus" onfocus="this.select()"> <button onclick="command()">Execute!</button>
       </div>
       <pre><code></code></pre>
     </div>
     <script>
-input.addEventListener("keyup", function(event) {
+last_cmd = ''; last_pid = 0; ctrl_c_pressed = 0;
+input.addEventListener("keydown", function(event) {
   if (event.keyCode === 13) {
     event.preventDefault();
     command();
+  } else if (event.keyCode === 38) {
+    event.preventDefault();
+    document.querySelector('input').value = last_cmd;
+  } else if (event.ctrlKey && event.keyCode === 67) {
+    ctrl_c_pressed++;
+    killer_socket.send(`SIGINT:${last_pid}`);
+    if (ctrl_c_pressed >= 7) {
+      killer_socket.send(`SIGKILL:${last_pid}`);
+      ctrl_c_pressed = 0;
+    }
   }
 });
       const execute = (cmd) => {
         socket.send(cmd);
+        last_cmd = cmd;
       }; const command = () => {
         cmd = document.querySelector('input').value;
         execute(cmd);
@@ -30,8 +42,8 @@ input.addEventListener("keyup", function(event) {
         document.querySelector('code').innerText += '\n---------------------\n\n';
       }
 
-      // const socket = new WebSocket(`ws://localhost:${document.location.port}`);
-      const socket = new WebSocket(`ws://localhost:8888`);
+      const socket = new WebSocket(`ws://localhost:${Number(document.location.port) + 1}`);
+      const killer_socket = new WebSocket(`ws://localhost:${Number(document.location.port) + 1}`);
 
       socket.addEventListener('open', function (event) {
           // socket.send('ping -c 8 1.1');
@@ -41,9 +53,15 @@ input.addEventListener("keyup", function(event) {
       socket.addEventListener('message', function (event) {
           data = event.data;
           if (data) {
-            data.text().then( txt => {
-              document.querySelector('code').innerText += txt;
-            });
+            // data.text().then( txt => {
+            txt = data;
+              if (txt.startsWith('!PID:')) {
+                last_pid = Number(txt.slice(5));
+                document.querySelector('code').innerText += `(PID: ${last_pid})\n`;
+              } else {
+                document.querySelector('code').innerText += txt;
+              };
+            // });
           }
       });
     </script>

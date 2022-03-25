@@ -10,19 +10,25 @@
     <div id="app">
       <h1 align="center"><a href="/wsproc">commanderY</a></h1>
       <div id="input">
-        $ <input name="cmd" autofocus="autofocus" onfocus="this.select()" placeholder="$ "> <button onclick="command()">Execute!</button>
+        <a href="/wsproc">$</a> <input name="cmd" autofocus="autofocus" onfocus="this.select()" placeholder="$ "> <button onclick="command()">Execute!</button>
       </div>
       <pre><code></code></pre>
     </div>
     <script src="./yokto.js"></script>
     <script>
-input.addEventListener("keyup", function(event) {
+last_cmd = '';
+input.addEventListener("keydown", function(event) {
   if (event.keyCode === 13) {
     event.preventDefault();
     command();
+  } else if (event.keyCode === 38) {
+    event.preventDefault();
+    curr_cmd = last_cmd;
+    cmd = document.querySelector('input').value = curr_cmd;
   }
 });
       const execute = (cmd) => {
+          last_cmd = cmd;
           let proc_name = cmd.split(' ')[0];
           let proc_args = cmd.slice(proc_name.length + 1).split(' ');
           let input = {'name': proc_name, 'args': proc_args};

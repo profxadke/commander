@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from typing import List
+
+from typing import List, Optional
 
 import subprocess, socket, psutil, signal
 from fastapi import (
@@ -79,15 +80,19 @@ def yokto():
 def style():
     return FileResponse('root/style.css')
 
+
 @app.get('/wsproc')
+@app.get('/wsprocess')
 @app.get('/ws')
 @app.get('/wsprocs')
 @app.get('/wproc')
+@app.get('/wprocess')
 def return_ws_page():
     return FileResponse('root/websocket.html')
 
 
 @app.put('/proc')
+@app.put('/process')
 def init_proc(proc_info: Command):
     """
     TODO: Return proc info and detach from parent while spying it using its PID, instead of returning the STDOUT.
@@ -107,7 +112,36 @@ def init_proc(proc_info: Command):
     return {'initiated': pid}
 
 
+@app.get('/proc')
+@app.get('/process')
+@app.get('/procinfo')
+@app.get('/processinfo')
+@app.get('/process_info')
+@app.get('/proc_info')
+def return_proc_info(pid: Optional[int] = 0):
+    resp = []
+    if pid:
+        for proc in procs:
+            if 'pid' in dir(proc):
+                if proc.pid == pid:
+                    if proc.is_running():
+                        return proc.as_dict()
+                    return {
+                        'name': proc.name(),
+                        'pid': proc.pid
+                    }
+    for proc in procs:
+        if 'pid' in dir(proc):
+            if proc.is_running():
+                resp.append(proc.as_dict())
+            else:
+                resp.append({'name': proc.name(), 'pid': proc.pid})
+    return resp
+
+
 @app.get('/std')
+@app.get('/stdout')
+@app.get('/stderr')
 def return_std_out_err():
     """
     Returns: [str(STDOUT), str(STDERR)]
@@ -118,6 +152,7 @@ def return_std_out_err():
 
 
 @app.delete('/proc')
+@app.delete('/process')
 def kill_proc():
     global proc_ids, proc, procs
     if proc:
@@ -131,6 +166,12 @@ def kill_proc():
 
 
 @app.websocket("/procopn")
+@app.websocket("/process_opn")
+@app.websocket("/processopn")
+@app.websocket("/process_open")
+@app.websocket("/processopen")
+@app.websocket("/proc_open")
+@app.websocket("/procopen")
 async def websocket_endpoint(ws: WebSocket):
     print(ws)
     await ws.accept()
@@ -160,9 +201,9 @@ async def websocket_endpoint(ws: WebSocket):
 
 if __name__ == '__main__':
     random_port = randint(1025, 65534)
-    while is_port_in_use(random_port):
+    while is_port_in_use(random_port) and is_port_in_use(random_port) + 1:
         random_port = randint(1025, 65534)
     __import__('webbrowser').open_new_tab(f'http://localhost:{random_port}')
-    ws_pid = __import__('os').system('python3 ./commanderX.py &')
+    ws_pid = __import__('os').system(f'python3 ./commanderX.py {random_port + 1} &')
     __import__('uvicorn').run('main:app', host='0.0.0.0', port=random_port, reload=True)
     __import__('os').kill(ws_pid, signal.SIGKILL)
