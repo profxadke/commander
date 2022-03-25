@@ -207,3 +207,4 @@ if __name__ == '__main__':
     ws_pid = __import__('os').system(f'python3 ./commanderX.py {random_port + 1} &')
     __import__('uvicorn').run('main:app', host='0.0.0.0', port=random_port, reload=True)
     __import__('os').kill(ws_pid, signal.SIGKILL)
+    __import__('sys').exit(0)
