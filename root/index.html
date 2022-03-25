@@ -16,6 +16,12 @@
     </div>
     <script src="./yokto.js"></script>
     <script>
+input.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+    event.preventDefault();
+    command();
+  }
+});
       const execute = (cmd) => {
           let proc_name = cmd.split(' ')[0];
           let proc_args = cmd.slice(proc_name.length + 1).split(' ');

@@ -99,11 +99,12 @@ def init_proc(proc_info: Command):
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             shell=True)
-    proc_ids.append(proc.pid)
+    pid = proc.pid
+    proc_ids.append(pid)
     for _proc in psutil.process_iter():
-        if _proc.id == proc.pid:
+        if _proc.pid == pid:
             procs.append(_proc)
-    return {'initiated': proc.pid}
+    return {'initiated': pid}
 
 
 @app.get('/std')
@@ -123,7 +124,7 @@ def kill_proc():
         pid = proc.pid; proc_ids.remove(pid)
         proc.kill(); proc = None
         for _proc in procs:
-            if _proc.id == pid:
+            if _proc.pid == pid:
                 procs.remove(_proc)
         return {'killed': pid}
     raise HTTPException(status_code=406, detail='No running process.')

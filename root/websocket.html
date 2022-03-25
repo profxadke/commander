@@ -15,6 +15,12 @@
       <pre><code></code></pre>
     </div>
     <script>
+input.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+    event.preventDefault();
+    command();
+  }
+});
       const execute = (cmd) => {
         socket.send(cmd);
       }; const command = () => {
