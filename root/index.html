@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>commanderY</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app">
+      <h1 align="center">commanderY</h1>
+      <div id="input">
+        $ <input name="cmd" autofocus="autofocus" onfocus="this.select()" placeholder="$ "> <button onclick="command()">Execute!</button>
+      </div>
+      <pre><code></code></pre>
+    </div>
+    <script src="./yokto.js"></script>
+    <script>
+      const execute = (cmd) => {
+          let proc_name = cmd.split(' ')[0];
+          let proc_args = cmd.slice(proc_name.length + 1).split(' ');
+          let input = {'name': proc_name, 'args': proc_args};
+          $_('PUT', '/proc', input).then( resp => {
+            pid = resp['initiated'];
+            if (pid) {
+              document.querySelector('code').innerText += `(PID: ${pid})\n`;
+              $_('GET', '/std').then( r => {
+                R = r['std[out, err]'];
+                if (!R[1]) {
+                  document.querySelector('code').innerText += R[0] + "\n";
+                } else {
+                        console.error(R[1]+'\n');
+                };
+                $_('DELETE', '/proc').then( killed_resp => {
+                  killed_pid = killed_resp['killed'];
+                  if (pid !== killed_pid) {
+                    console.error(`PID: ${pid} was not killed.`);
+                  } else {
+                    document.querySelector('code').innerText += "-----------\n\n";
+                  }
+                });    
+              });
+            }
+        });
+      };
+      const command = () => {
+        cmd = document.querySelector('input').value;
+        if (cmd) {
+          execute(cmd);
+          document.querySelector('input').value = '';
+          document.querySelector('code').innerText += '$ ' + cmd + "\n";
+        }
+      };
+    </script>
+  </body>
+</html>

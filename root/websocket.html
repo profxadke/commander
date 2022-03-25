@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>commanderX</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app">
+      <h1 align="center">commanderX</h1>
+      <div id="input">
+        $ <input name="cmd" placeholder="$ " autofocus="autofocus" onfocus="this.select()"> <button onclick="command()">Execute!</button>
+      </div>
+      <pre><code></code></pre>
+    </div>
+    <script>
+      const execute = (cmd) => {
+        socket.send(cmd);
+      }; const command = () => {
+        cmd = document.querySelector('input').value;
+        execute(cmd);
+        document.querySelector('input').value = '';
+        document.querySelector('code').innerText += '\n---------------------\n\n';
+      }
+
+      // const socket = new WebSocket(`ws://localhost:${document.location.port}`);
+      const socket = new WebSocket(`ws://localhost:8888`);
+
+      socket.addEventListener('open', function (event) {
+          // socket.send('ping -c 8 1.1');
+          document.querySelector('code').innerText += '[+] Connected!\n';
+      });
+
+      socket.addEventListener('message', function (event) {
+          data = event.data;
+          if (data) {
+            data.text().then( txt => {
+              document.querySelector('code').innerText += txt;
+            });
+          }
+      });
+    </script>
+  </body>
+</html>
