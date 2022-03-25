@@ -10,7 +10,7 @@
     <div id="app">
       <h1 align="center"><a href="/">commanderX</a></h1>
       <div id="input">
-        <a href="/">$</a> <input name="cmd" placeholder="$ " autofocus="autofocus" onfocus="this.select()"> <button onclick="command()">Execute!</button>
+        <a href="/">$</a> <input name="cmd" placeholder="$ " autofocus="autofocus" onfocus="this.select()"> <button onclick="command()">Execute</button>
       </div>
       <pre><code></code></pre>
     </div>
@@ -33,6 +33,7 @@ input.addEventListener("keydown", function(event) {
   }
 });
       const execute = (cmd) => {
+        document.querySelector('code').innerText += `$ ${cmd}\n`;
         socket.send(cmd);
         last_cmd = cmd;
       }; const command = () => {
@@ -47,7 +48,7 @@ input.addEventListener("keydown", function(event) {
 
       socket.addEventListener('open', function (event) {
           // socket.send('ping -c 8 1.1');
-          document.querySelector('code').innerText += '[+] Connected!\n';
+          document.querySelector('code').innerText += '[+] Connected!\n\n';
       });
 
       socket.addEventListener('message', function (event) {
@@ -60,6 +61,7 @@ input.addEventListener("keydown", function(event) {
                 document.querySelector('code').innerText += `(PID: ${last_pid})\n`;
               } else {
                 document.querySelector('code').innerText += txt;
+                window.scrollTo(0, 9999);
               };
             // });
           }

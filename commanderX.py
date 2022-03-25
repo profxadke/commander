@@ -35,7 +35,7 @@ def invoke_commanderX(client, cmd):
             ws.send(client, f'!MSG:KILLED({pid})')
         else:
             ws.send(client, f'!MSG:UNSUPPORTED_SIGNAL({pid})')
-    elif cmd.startswith('!'):
+    elif cmd.startswith('#'):
         cmd = cmd[1:];
         with Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True) as prox:
             ws.send(client, f'!PID:{prox.pid}\n')
@@ -68,7 +68,6 @@ def on_connection_close(client): pass
 
 def on_server_destruct(): pass
 
-print(__import__('sys').argv[1])
 ws = WS(
     "0.0.0.0",
     int(__import__("sys").argv[1]),
