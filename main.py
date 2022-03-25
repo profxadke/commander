@@ -4,20 +4,13 @@
 from typing import List, Optional
 
 import subprocess, socket, psutil, signal
+from random import randint
 from fastapi import (
     FastAPI,
-    WebSocket,
-    WebSocketDisconnect,
-    Request,
-    Response,
     HTTPException
 ); from fastapi.responses import (
-    FileResponse,
-    StreamingResponse,
-    RedirectResponse
-)
-from psutil import process_iter; from pydantic import BaseModel
-from random import randint
+    FileResponse
+); from pydantic import BaseModel
 
 
 USE_NL_DELIMETER = True
@@ -178,40 +171,6 @@ def kill_proc():
                     procs.remove(_proc)
         return {'killed': pid}
     raise HTTPException(status_code=406, detail='No running process.')
-
-
-@app.websocket("/procopn")
-@app.websocket("/process_opn")
-@app.websocket("/processopn")
-@app.websocket("/process_open")
-@app.websocket("/processopen")
-@app.websocket("/proc_open")
-@app.websocket("/procopen")
-async def websocket_endpoint(ws: WebSocket):
-    print(ws)
-    await ws.accept()
-    try:
-        while 1:
-            cmd = await ws.receive_text()
-            print(cmd)
-            if cmd.endswith('!'):
-                cmd = cmd[:-1]
-                use_lines = False
-            with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True, shell=True) as prox:
-                if use_lines:
-                    for line in prox.stdout:
-                        line = line.rstrip()
-                        await ws.send_text(line)
-                    for line in prox.stderr:
-                        line = line.rstrip()
-                        await ws.send_text(line)
-                else:
-                    for line in unbuffered(prox):
-                        await ws.send_text(line)
-                    for line in unbuffered(prox, 'stderr'):
-                        await ws.send_text(line)
-    except WebSocketDisconnect:
-        print(ws)
 
 
 if __name__ == '__main__':
