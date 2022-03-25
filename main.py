@@ -80,6 +80,9 @@ def style():
     return FileResponse('root/style.css')
 
 @app.get('/wsproc')
+@app.get('/ws')
+@app.get('/wsprocs')
+@app.get('/wproc')
 def return_ws_page():
     return FileResponse('root/websocket.html')
 
