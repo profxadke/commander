@@ -42,20 +42,20 @@ def invoke_commanderX(client, cmd):
         cmd = cmd[1:];
         with Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True) as prox:
             ws.send(client, f'!PID:{prox.pid}\n')
-            for line in unbuffered(prox):
-                ws.send(client, html.escape(line.decode()))
-            for line in unbuffered(prox, 'stderr'):
-                ws.send(client, html.escape(line.decode()))
-            prox.kill()
-    else:
-        with Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True) as prox:
-            ws.send(client, f'!PID:{prox.pid}\n')
             for line in prox.stdout:
                 line = line.rstrip().decode() + "\n"
                 ws.send(client, html.escape(line))
             for line in prox.stderr:
                 line = line.rstrip().decode() + "\n"
                 ws.send(client, html.escape(line))
+            prox.kill()
+    else:
+        with Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True) as prox:
+            ws.send(client, f'!PID:{prox.pid}\n')
+            for line in unbuffered(prox):
+                ws.send(client, html.escape(line.decode()))
+            for line in unbuffered(prox, 'stderr'):
+                ws.send(client, html.escape(line.decode()))
             prox.kill()
 
 
