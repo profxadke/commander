@@ -6,14 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="style.css" rel="stylesheet">
   </head>
-  <body>
+  <body class="f9 b0">
     <div id="app">
       <h1 align="center"><a href="/">commanderX</a></h1>
       <div id="input">
-        <a href="/">$</a> <input name="cmd" placeholder="$ " autofocus="autofocus" onfocus="this.select()"> <button onclick="command()">Execute</button>
+        <a href="/">$</a> <input name="cmd" placeholder="id" autofocus="autofocus" onfocus="this.select()"> <button onclick="command()">Execute</button>
       </div>
       <pre><code></code></pre>
     </div>
+    <script src="./yokto.js"></script>
     <script>
 last_cmd = ''; last_pid = 0; ctrl_c_pressed = 0;
 input.addEventListener("keydown", function(event) {
@@ -22,7 +23,7 @@ input.addEventListener("keydown", function(event) {
     command();
   } else if (event.keyCode === 38) {
     event.preventDefault();
-    document.querySelector('input').value = last_cmd;
+    $('input').value = last_cmd;
   } else if (event.ctrlKey && event.keyCode === 67) {
     ctrl_c_pressed++;
     killer_socket.send(`SIGINT:${last_pid}`);
@@ -33,14 +34,16 @@ input.addEventListener("keydown", function(event) {
   }
 });
       const execute = (cmd) => {
-        document.querySelector('code').innerText += `$ ${cmd}\n`;
         socket.send(cmd);
         last_cmd = cmd;
+        $('input').placeholder = last_cmd;
       }; const command = () => {
-        cmd = document.querySelector('input').value;
+        cmd = $('input').value;
+        $('code').innerHTML += '\n<hr/>\n\n';
+        // $('code').innerHTML += '\n---------------------\n\n';
+        $('code').innerHTML += escapeHtml(`$ ${cmd}\n\n`);
         execute(cmd);
-        document.querySelector('input').value = '';
-        document.querySelector('code').innerText += '\n---------------------\n\n';
+        $('input').value = '';
       }
 
       const socket = new WebSocket(`ws://localhost:${Number(document.location.port) + 1}`);
@@ -48,7 +51,7 @@ input.addEventListener("keydown", function(event) {
 
       socket.addEventListener('open', function (event) {
           // socket.send('ping -c 8 1.1');
-          document.querySelector('code').innerText += '[+] Connected!\n\n';
+          $('code').innerHTML += '[+] Connected!\n\n';
       });
 
       socket.addEventListener('message', function (event) {
@@ -58,10 +61,10 @@ input.addEventListener("keydown", function(event) {
             txt = data;
               if (txt.startsWith('!PID:')) {
                 last_pid = Number(txt.slice(5));
-                document.querySelector('code').innerText += `(PID: ${last_pid})\n`;
+                $('code').innerHTML += `(PID: ${last_pid})\n`;
               } else {
-                document.querySelector('code').innerText += txt;
-                window.scrollTo(0, 9999);
+                $('code').innerHTML += term2html(txt);
+                window.scrollTo(0, 999999999);
               };
             // });
           }

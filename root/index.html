@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="style.css" rel="stylesheet">
   </head>
-  <body>
+  <body class="f9 b0">
     <div id="app">
       <h1 align="center"><a href="/wsproc">commanderY</a></h1>
       <div id="input">
-        <a href="/wsproc">$</a> <input name="cmd" autofocus="autofocus" onfocus="this.select()" placeholder="$ "> <button onclick="command()">Execute</button>
+        <a href="/wsproc">$</a> <input name="cmd" autofocus="autofocus" onfocus="this.select()" placeholder="id"> <button onclick="command()">Execute</button>
       </div>
       <pre><code></code></pre>
     </div>
@@ -35,11 +35,11 @@ input.addEventListener("keydown", function(event) {
           $_('PUT', '/proc', input).then( resp => {
             pid = resp['initiated'];
             if (pid) {
-              document.querySelector('code').innerText += `(PID: ${pid})\n`;
+              document.querySelector('code').innerHTML += `(PID: ${pid})\n`;
               $_('GET', '/std').then( r => {
                 R = r['std[out, err]'];
                 if (!R[1]) {
-                  document.querySelector('code').innerText += R[0] + "\n";
+                  document.querySelector('code').innerHTML += term2html(R[0]) + "\n";
                 } else {
                         console.error(R[1]+'\n');
                 };
@@ -48,7 +48,8 @@ input.addEventListener("keydown", function(event) {
                   if (pid !== killed_pid) {
                     console.error(`PID: ${pid} was not killed.`);
                   } else {
-                    document.querySelector('code').innerText += "-----------\n\n";
+                    document.querySelector('code').innerHTML += "<hr/>\n\n";
+                    // document.querySelector('code').innerHTML += "-----------\n\n";
                   }
                 });    
               });
@@ -59,8 +60,9 @@ input.addEventListener("keydown", function(event) {
         cmd = document.querySelector('input').value;
         if (cmd) {
           execute(cmd);
+          document.querySelector('input').placeholder = cmd;
           document.querySelector('input').value = '';
-          document.querySelector('code').innerText += '$ ' + cmd + "\n";
+          document.querySelector('code').innerHTML += '$ ' + escapeHtml(cmd) + "\n";
         }
       };
     </script>

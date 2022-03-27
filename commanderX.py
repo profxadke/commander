@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os 
+import os, html
 from signal import (
     SIGKILL,
     SIGINT
@@ -25,34 +25,37 @@ def unbuffered(proc, stream='stdout'):
 
 def invoke_commanderX(client, cmd):
     if cmd.startswith('SIG'):
-        if cmd.startswith('SIGINT:'):
-            cmd, pid = cmd.split(':')
-            ws.send(client, f'!MSG:Interrupting({pid})')
-            os.kill(int(pid), SIGINT)
-        elif cmd.startswith('SIGKILL:'):
-            cmd, pid = cmd.split(':')
-            os.kill(int(pid), SIGKILL)
-            ws.send(client, f'!MSG:KILLED({pid})')
-        else:
-            ws.send(client, f'!MSG:UNSUPPORTED_SIGNAL({pid})')
+        try:
+            if cmd.startswith('SIGINT:'):
+                cmd, pid = cmd.split(':')
+                ws.send(client, f'!MSG:Interrupting({pid})')
+                os.kill(int(pid), SIGINT)
+            elif cmd.startswith('SIGKILL:'):
+                cmd, pid = cmd.split(':')
+                os.kill(int(pid), SIGKILL)
+                ws.send(client, f'!MSG:KILLED({pid})')
+            else:
+                ws.send(client, f'!MSG:UNSUPPORTED_SIGNAL({pid})')
+        except:
+            pass
     elif cmd.startswith('#'):
         cmd = cmd[1:];
         with Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True) as prox:
             ws.send(client, f'!PID:{prox.pid}\n')
             for line in unbuffered(prox):
-                ws.send(client, line.decode())
+                ws.send(client, html.escape(line.decode()))
             for line in unbuffered(prox, 'stderr'):
-                ws.send(client, line.decode())
+                ws.send(client, html.escape(line.decode()))
             prox.kill()
     else:
         with Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True) as prox:
             ws.send(client, f'!PID:{prox.pid}\n')
             for line in prox.stdout:
                 line = line.rstrip().decode() + "\n"
-                ws.send(client, line)
+                ws.send(client, html.escape(line))
             for line in prox.stderr:
                 line = line.rstrip().decode() + "\n"
-                ws.send(client, line)
+                ws.send(client, html.escape(line))
             prox.kill()
 
 

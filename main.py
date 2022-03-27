@@ -3,7 +3,7 @@
 
 from typing import List, Optional
 
-import subprocess, socket, psutil, signal
+import subprocess, socket, psutil, signal, html
 from random import randint
 from fastapi import (
     FastAPI,
@@ -61,6 +61,17 @@ proc = None
 
 
 @app.get('/')
+@app.get('/index')
+@app.get('/index.txt')
+@app.get('/index.html')
+@app.get('/index.htmlx')
+@app.get('/index.htm')
+@app.get('/index.js')
+@app.get('/index.py')
+@app.get('/index.php')
+@app.get('/index.asp')
+@app.get('/index.net')
+@app.get('/index.com')
 def root():
     return FileResponse('root/index.html')
 
@@ -153,8 +164,10 @@ def return_std_out_err():
     """
     Returns: [str(STDOUT), str(STDERR)]
     """
+    stdout, stderr = proc.communicate()
+    stdout, stderr = html.escape(stdout.decode()), html.escape(stderr.decode())
     if proc:
-        return {'std[out, err]': proc.communicate()}
+        return {'std[out, err]': (stdout, stderr)}
     raise HTTPException(status_code=406, detail='No running process.')
 
 
