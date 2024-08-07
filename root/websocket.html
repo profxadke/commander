@@ -64,7 +64,7 @@ input.addEventListener("keydown", function(event) {
                 $('code').innerHTML += `(PID: ${last_pid})\n`;
               } else {
                 $('code').innerHTML += term2html(txt);
-                window.scrollTo(0, 999999999);
+                window.scrollTo(0, $("code").scrollHeight);
               };
             // });
           }

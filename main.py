@@ -92,6 +92,10 @@ def style():
 @app.get('/wsprocs')
 @app.get('/wproc')
 @app.get('/wprocess')
+@app.get('/ws.html')
+@app.get('/websocket.html')
+@app.get('/ws.htm')
+@app.get('/websocket.htm')
 def return_ws_page():
     return FileResponse('root/websocket.html')
 
@@ -104,7 +108,7 @@ def init_proc(proc_info: Command):
     """
     global proc_ids, proc, procs
     cmd = f'{proc_info.name} {" ".join(proc_info.args)}'
-    print(cmd)
+    # print(cmd)
     proc = subprocess.Popen(cmd,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,

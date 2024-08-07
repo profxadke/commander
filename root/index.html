@@ -42,7 +42,7 @@ input.addEventListener("keydown", function(event) {
                   document.querySelector('code').innerHTML += term2html(R[0]) + "\n";
                 } else {
                         console.error(R[1]+'\n');
-                };
+                }; window.scrollTo(0, $('code').scrollHeight);
                 $_('DELETE', '/proc').then( killed_resp => {
                   killed_pid = killed_resp['killed'];
                   if (pid !== killed_pid) {
@@ -50,9 +50,9 @@ input.addEventListener("keydown", function(event) {
                   } else {
                     document.querySelector('code').innerHTML += "<hr/>\n\n";
                     // document.querySelector('code').innerHTML += "-----------\n\n";
-                  }
+                  }; window.scrollTo(0, $('code').scrollHeight);
                 });    
-              });
+              }); window.scrollTo(0, $('code').scrollHeight);
             }
         });
       };
