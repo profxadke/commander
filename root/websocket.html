@@ -69,6 +69,12 @@ input.addEventListener("keydown", function(event) {
             // });
           }
       });
+      $('#input').onkeyup =  e => {
+      if (e.which == 9) {
+          $('input').value = $('input').placeholder;
+          $('input').focus()
+        }
+      }
     </script>
   </body>
 </html>

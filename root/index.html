@@ -65,6 +65,12 @@ input.addEventListener("keydown", function(event) {
           document.querySelector('code').innerHTML += '$ ' + escapeHtml(cmd) + "\n";
         }
       };
+      $('#input').onkeyup =  e => {
+      if (e.which == 9) {
+          $('input').value = $('input').placeholder;
+          $('input').focus()
+        }
+      }
     </script>
   </body>
 </html>
